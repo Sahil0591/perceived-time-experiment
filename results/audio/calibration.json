@@ -1,0 +1,7 @@
+{
+  "method": "self",
+  "feature": "sum_dL2",
+  "alpha": 0.01901321843913437,
+  "beta": 0.0,
+  "rate_col": "rate_dL2"
+}

@@ -1,0 +1,32 @@
+node_modules/
+web/human_experiment/dist/
+.DS_Store
+
+# Environment and secrets
+.env
+.env.*
+*.env
+
+# Python virtual environments
+.venv/
+
+# Data/media artifacts
+*.mp4
+*.MP4
+*.wav
+*.WAV
+*.csv
+*.CSV
+*.jpg
+*.JPG
+
+# Project folders not meant for repository
+documents/
+Documents/
+web/
+
+# Node lockfile
+package-lock.json
+package.json
+vercel.json
+vite.config.js

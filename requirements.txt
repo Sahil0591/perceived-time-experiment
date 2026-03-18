@@ -1,0 +1,13 @@
+jupyter
+notebook
+openl3
+librosa
+numpy
+pandas
+matplotlib
+scikit-learn
+tqdm
+opencv-python
+moviepy
+soundfile
+audioread

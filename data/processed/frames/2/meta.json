@@ -1,0 +1,11 @@
+{
+  "video_path": "data\\processed\\2_processed.mp4",
+  "target_fps": 30,
+  "saved_frames": 720,
+  "duration_sec": 23.98,
+  "frame_size": 224,
+  "timeline": {
+    "start_sec": 0.0,
+    "step_sec": 0.03333333333333333
+  }
+}
