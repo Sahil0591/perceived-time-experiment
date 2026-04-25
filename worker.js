@@ -72,6 +72,33 @@ export default {
       });
     }
 
+    // Check authoritative submission state for a participant
+    if (req.method === 'GET' && url.pathname === '/submit-status') {
+      const participantId = (url.searchParams.get('participantId') || '').trim();
+      if (!participantId) {
+        return new Response(JSON.stringify({ error: 'participantId required' }), {
+          status: 400, headers: { 'Content-Type': 'application/json', ...cors }
+        });
+      }
+
+      const row = await env.DB
+        .prepare('SELECT payload FROM assignments WHERE participant_id = ?')
+        .bind(participantId)
+        .first();
+
+      let payload = {};
+      try { payload = row?.payload ? JSON.parse(row.payload) : {}; } catch {}
+
+      return new Response(JSON.stringify({
+        participantId,
+        submitted: payload?.submitted === true,
+        submittedAt: payload?.submittedAt || null,
+        lastKey: payload?.lastKey || null
+      }), {
+        status: 200, headers: { 'Content-Type': 'application/json', ...cors }
+      });
+    }
+
     // Secure download route for combined reports: GET /download/:token
     if (req.method === 'GET' && url.pathname.startsWith('/download/')) {
       const token = url.pathname.replace('/download/', '').trim();

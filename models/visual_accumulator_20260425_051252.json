@@ -1,0 +1,51 @@
+{
+  "name": "visual_accumulator_4layer",
+  "created_at": "2026-04-25T05:12:52",
+  "params": {
+    "ATTENTION_C": 0.67,
+    "layer_params": {
+      "conv2": {
+        "T_max": 340.0,
+        "T_min": 100.0,
+        "tau": 100.0,
+        "alpha": 50.0
+      },
+      "pool5": {
+        "T_max": 400.0,
+        "T_min": 100.0,
+        "tau": 100.0,
+        "alpha": 50.0
+      },
+      "fc7": {
+        "T_max": 35.0,
+        "T_min": 5.0,
+        "tau": 100.0,
+        "alpha": 50.0
+      },
+      "output": {
+        "T_max": 0.55,
+        "T_min": 0.15,
+        "tau": 100.0,
+        "alpha": 50.0
+      }
+    }
+  },
+  "calibration": {
+    "coef_conv2": -0.0007712352696968912,
+    "coef_pool5": -0.08051925785982378,
+    "coef_fc7": -0.006823664819074123,
+    "coef_output": 0.034074223816102124,
+    "intercept": -0.024032584732623263
+  },
+  "metrics": {
+    "pearson_r_vs_human": 0.8622598237347172,
+    "mae_vs_human": 6.1852038883708635,
+    "rmse_vs_human": 10.901488023107392,
+    "pearson_r_vs_real": 0.9994205883585008
+  },
+  "data_sources": {
+    "precomputed_frames_dir": "D:\\Sahil\\Capstone_Project\\results\\visual\\redacted\\frames",
+    "trial_sequence": "D:\\Sahil\\Capstone_Project\\results\\visual\\prof\\Video_trial_sequence(in).csv",
+    "ground_truth": "D:\\Sahil\\Capstone_Project\\results\\visual\\prof\\summary_tuned.csv"
+  }
+}

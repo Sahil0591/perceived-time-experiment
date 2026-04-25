@@ -1,0 +1,20 @@
+{
+  "name": "audio_accumulator_openl3",
+  "created_at": "2026-04-18T21:50:20",
+  "mode": "supervised",
+  "params": {
+    "ATTENTION": 0.67,
+    "EMA_ALPHA": 0.04,
+    "THRESH_K": 0.4,
+    "REFRACTORY": 1,
+    "WARMUP": 3
+  },
+  "calibration": {
+    "slope": 0.9187548792590142,
+    "intercept": 2.869977009593118
+  },
+  "metrics": {
+    "pearson_r_vs_human": 0.6506184159601888,
+    "mae_vs_human": 2.684140322343515
+  }
+}

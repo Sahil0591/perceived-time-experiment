@@ -44,7 +44,7 @@ class PreprocessConfig:
     # Visual frame extraction options
     save_frames: bool = False
     frames_dir: Path = Path("data/processed/frames")
-    frames_fps: int = 15
+    frames_fps: int = 30
     frame_size: int = 224
 
 

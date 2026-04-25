@@ -1,0 +1,26 @@
+{
+  "name": "visual_accumulator_fc7",
+  "created_at": "2026-04-16T18:35:28",
+  "params": {
+    "ATTENTION": 0.6,
+    "EMA_ALPHA": 0.05,
+    "THRESH_K": 1.6,
+    "REFRACTORY": 1,
+    "WARMUP": 10
+  },
+  "calibration": {
+    "slope": 0.5713432680115931,
+    "intercept": 1.3200200901359924
+  },
+  "metrics": {
+    "pearson_r_vs_human": 0.8468866052076186,
+    "mae_vs_human": 6.4762252191714715,
+    "rmse_vs_human": 11.14129413332078,
+    "pearson_r_vs_real": 0.9837178481234667
+  },
+  "data_sources": {
+    "precomputed_frames_dir": "D:\\Sahil\\Capstone_Project\\results\\visual\\redacted\\frames",
+    "trial_sequence": "D:\\Sahil\\Capstone_Project\\results\\visual\\prof\\Video_trial_sequence(in).csv",
+    "ground_truth": "D:\\Sahil\\Capstone_Project\\results\\visual\\prof\\summary_tuned.csv"
+  }
+}
