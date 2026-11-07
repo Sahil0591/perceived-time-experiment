@@ -36,12 +36,39 @@ Full metrics: [`results/fusion/fusion_metrics.json`](results/fusion/fusion_metri
 
 ## How it works
 
-```
-             ┌─ frames (30 fps, 224 px) ─→ AlexNet layers ─→ L2 change per frame ─┐
-video clip ──┤                                                                    ├─→ accumulator ─→ ticks ─→ calibration ─→ seconds
-             └─ audio (48 kHz, RMS-norm) ─→ OpenL3 embeddings ─→ L2 change ───────┘        │
-                                                                                            ▼
-                                       late fusion:  pred_AV = w_v · visual + w_a · audio
+```mermaid
+flowchart TB
+    clip["Video clip<br/>(20-25 s)"] --> pre["preprocess_data.py<br/>normalise loudness,<br/>extract frames"]
+
+    subgraph visual["Visual pathway"]
+        frames["Frames<br/>30 fps, 224 px"] --> alex["AlexNet<br/>conv2, pool5, fc7, output"]
+        alex --> vdiff["L2 change<br/>between frames"]
+        vdiff --> vacc["Accumulator<br/>(ticks per layer)"]
+        vacc --> vcal["SVR calibration"]
+    end
+
+    subgraph audio["Audio pathway"]
+        wav["Audio<br/>48 kHz"] --> l3["OpenL3<br/>512-d embeddings"]
+        l3 --> adiff["L2 change<br/>between windows"]
+        adiff --> aacc["Accumulator<br/>(ticks)"]
+        aacc --> acal["Linear calibration"]
+    end
+
+    pre --> frames
+    pre --> wav
+    vcal --> vpred(["Visual prediction (s)"])
+    acal --> apred(["Audio prediction (s)"])
+    vpred --> fusion["Late fusion<br/>0.27 x visual + 0.73 x audio"]
+    apred --> fusion
+    fusion --> avpred(["Audio-visual prediction (s)"])
+
+    roseboom[("Roseboom et al. data<br/>33 videos, 4,251 trials")]
+    humans[("Own experiment<br/>35 participants<br/>V, A, AV conditions")]
+    roseboom -.->|train| vcal
+    humans -.->|fit| acal
+    humans -.->|fit + LOO-CV| fusion
+    humans -.->|evaluate| vpred
+    humans -.->|evaluate| apred
 ```
 
 **Accumulator:** a "tick" fires when the attention-weighted change between consecutive embeddings crosses an adaptive threshold. The visual threshold decays between ticks; the audio threshold tracks a running mean + k·σ. A refractory period stops ticks firing back to back. Tick counts are then mapped to seconds with a calibration fitted to human judgments (an SVR for visual, linear regression for audio).
