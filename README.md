@@ -93,11 +93,12 @@ results/                        figures and summary metrics
 
 ## Running it
 
-Requires Python 3.8–3.10 and FFmpeg. A CUDA GPU is optional but speeds up feature extraction.
+Requires Python 3.10 (TensorFlow 2.12, used by OpenL3, does not support 3.12+). FFmpeg is fetched automatically by MoviePy on first use. A CUDA GPU is optional but speeds up feature extraction.
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
+# optional, for GPU: pip install torch==2.4.1 torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 python main.py                  # dependency + CUDA check
 
