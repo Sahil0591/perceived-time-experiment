@@ -11,7 +11,7 @@ It extends the visual accumulator model of [Roseboom et al. (2019, *Nature Commu
 - **End-to-end research pipeline**: video preprocessing → deep feature extraction → accumulator model → calibration → human-data evaluation.
 - **Replicated a published model**: re-implemented the Roseboom et al. visual accumulator on AlexNet (conv2, pool5, fc7, output layers), calibrated with an RBF-kernel SVR on 4,251 human trials from the original study's 33 videos.
 - **Extended it to audio**: the same tick-counting accumulator driven by OpenL3 audio embeddings.
-- **Ran my own human experiment**: a jsPsych web experiment (separate repo) collected **525 duration judgments from 35 participants** on 36 first-person travel clips, each viewed in one of three conditions: video-only (V), audio-only (A) or audio-visual (AV).
+- **Ran my own human experiment**: a custom jsPsych web experiment collected **525 duration judgments from 35 participants** on 36 first-person travel clips, each viewed in one of three conditions: video-only (V), audio-only (A) or audio-visual (AV).
 - **Multisensory fusion**: a linear late-fusion model, evaluated with leave-one-out cross-validation.
 
 ## Results
@@ -113,4 +113,4 @@ Python · PyTorch / torchvision (AlexNet) · OpenL3 / TensorFlow · librosa · O
 
 ## Context
 
-Individual capstone project. The participant-facing experiment website is maintained in a separate repository.
+Individual capstone project. The human data was collected online through a custom jsPsych experiment website, which is no longer live.
