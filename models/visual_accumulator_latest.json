@@ -1,6 +1,6 @@
 {
   "name": "visual_accumulator_4layer",
-  "created_at": "2026-04-25T22:40:32",
+  "created_at": "2026-05-01T12:23:46",
   "params": {
     "ATTENTION_C": 0.67,
     "layer_params": {
@@ -32,17 +32,21 @@
   },
   "calibration": {
     "regressor": "epsilon-SVR (RBF kernel)",
-    "gamma": 0.0001,
-    "C_svr": 0.001,
+    "gamma": "scale",
+    "C_svr": 1.0,
     "epsilon": 0.1,
     "cv_folds": 10,
-    "n_support_vectors": 4170
+    "features": "raw_ticks + log1p(ticks) per layer",
+    "physical_pickle": "D:\\Sahil\\Capstone_Project\\models\\visual_svr_physical.pkl",
+    "human_pickle": "D:\\Sahil\\Capstone_Project\\models\\visual_svr_human.pkl",
+    "n_support_physical": 4205,
+    "n_support_human": 4055
   },
   "metrics": {
-    "pearson_r_vs_human": 0.6823497108761966,
-    "mae_vs_human": 7.38332616786672,
-    "rmse_vs_human": 11.828154036319233,
-    "pearson_r_vs_real": 0.7800625898003045
+    "pearson_r_vs_human": 0.6879257506330805,
+    "mae_vs_human": 7.409108848927772,
+    "rmse_vs_human": 11.758009994321027,
+    "pearson_r_vs_real": 0.7878353963363816
   },
   "data_sources": {
     "precomputed_frames_dir": "D:\\Sahil\\Capstone_Project\\results\\visual\\redacted\\frames",

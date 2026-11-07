@@ -1,0 +1,55 @@
+{
+  "created_at": "2026-05-01T12:32:27",
+  "n_clips": 36,
+  "fusion_equation": {
+    "w_visual": 0.27,
+    "w_audio": 0.73,
+    "intercept": 0.0
+  },
+  "single_baselines": [
+    {
+      "label": "Visual-only vs V-condition humans",
+      "r": 0.4972017121001531,
+      "mae": 5.688818694362652,
+      "rmse": 6.662507753771198,
+      "bias": -0.6549534277328797
+    },
+    {
+      "label": "Audio-only vs A-condition humans",
+      "r": 0.6899390799522674,
+      "mae": 2.787166666666667,
+      "rmse": 3.2342003992056867,
+      "bias": 1.117
+    }
+  ],
+  "on_av_target": {
+    "visual_only": {
+      "label": "Visual-only vs AV humans",
+      "r": 0.4500580819317283,
+      "mae": 6.192207204451397,
+      "rmse": 6.986637763582434,
+      "bias": -1.5047589832884352
+    },
+    "audio_only": {
+      "label": "Audio-only vs AV humans",
+      "r": 0.4448946254422889,
+      "mae": 3.553666666666667,
+      "rmse": 4.468826884342492,
+      "bias": 2.367888888888889
+    },
+    "fusion_loo_cv": {
+      "label": "Fusion vs AV-condition humans (LOO-CV)",
+      "r": 0.5020319785770823,
+      "mae": 3.253038714356375,
+      "rmse": 4.060548027115759,
+      "bias": 1.365197589070118
+    }
+  },
+  "data_sources": {
+    "visual_predictions": "D:\\Sahil\\Capstone_Project\\results\\visual\\travel\\travel_clip_predictions_human.csv",
+    "audio_predictions": "D:\\Sahil\\Capstone_Project\\results\\audio\\summary.csv",
+    "v_labels": "D:\\Sahil\\Capstone_Project\\data\\labels\\video_perceived.csv",
+    "a_labels": "D:\\Sahil\\Capstone_Project\\data\\labels\\audio_perceived.csv",
+    "av_labels": "D:\\Sahil\\Capstone_Project\\data\\labels\\av_perceived.csv"
+  }
+}

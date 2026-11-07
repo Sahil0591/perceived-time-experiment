@@ -1,32 +1,52 @@
-node_modules/
-web/human_experiment/dist/
+# OS / editor
 .DS_Store
+Thumbs.db
 
 # Environment and secrets
 .env
 .env.*
 *.env
 
-# Python virtual environments
+# Python
 .venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
 
-# Data/media artifacts
-*.mp4
-*.MP4
-*.wav
-*.WAV
-*.csv
-*.CSV
-*.jpg
-*.JPG
-
-# Project folders not meant for repository
-documents/
-Documents/
+# Experiment website lives in its own repo
 web/
-
-# Node lockfile
-package-lock.json
+api/
+worker.js
+node_modules/
 package.json
+package-lock.json
 vercel.json
 vite.config.js
+
+# Media and raw data (copyrighted clips, large files)
+*.mp4
+*.MP4
+*.mov
+*.wav
+*.WAV
+*.jpg
+*.JPG
+*.npy
+*.zip
+data/*
+!data/README.md
+
+# Participant-level data: only per-clip aggregates are published
+*.csv
+*.CSV
+!results/fusion/fusion_predictions.csv
+
+# Superseded notebook and intermediate tuning runs (only *_latest artifacts are kept)
+models/*_2026*.json
+notebooks/visual_predict_travel.ipynb
+
+# University submission material
+documents/
+Documents/
+Submission/
+report/

@@ -3,12 +3,13 @@ import statistics
 from pathlib import Path
 from collections import defaultdict
 
-# ── Config ────────────────────────────────────────────────────────────────────
-COMBINED_DIR = Path(r"D:\Sahil\Capstone_Project\results\Combined csv")
-OUT_DIR      = Path(r"D:\Sahil\Capstone_Project\data\labels")
+# Paths and output location
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+COMBINED_DIR = PROJECT_ROOT / "results" / "Combined csv"
+OUT_DIR      = PROJECT_ROOT / "data" / "labels"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# ── Load all CSVs from the folder ─────────────────────────────────────────────
+# Read every CSV in the combined folder
 all_rows = []
 csv_files = sorted(COMBINED_DIR.glob("*.csv"))
 print(f"Found {len(csv_files)} CSV files:")
@@ -18,7 +19,7 @@ for f in csv_files:
     print(f"  {f.name} — {len(rows)} rows")
     all_rows.extend(rows)
 
-# ── Clean — keep only rows with valid clip_id, condition, numeric response ────
+# Keep only rows that have the fields we need and a numeric response
 clean = []
 for r in all_rows:
     if r.get('clip_id') and r.get('condition') and r.get('response') and r.get('response') != 'null':
@@ -42,7 +43,7 @@ for cond in ['A', 'V', 'AV']:
     clips = len(set(r['clip_id'] for r in clean if r['condition'] == cond))
     print(f"  Condition {cond}: {n} responses across {clips} clips")
 
-# ── Diagnose imbalance ────────────────────────────────────────────────────────
+# Check whether any participant is imbalanced across conditions
 per_participant = defaultdict(lambda: defaultdict(list))
 for r in clean:
     per_participant[r['participant_id']][r['condition']].append(r['clip_id'])
@@ -59,9 +60,9 @@ for pid, conds in sorted(per_participant.items()):
 if not found:
     print("  None — all participants have equal counts across conditions")
 
-# ── Helper: write averaged clip-level CSV ─────────────────────────────────────
+# Write one averaged row per clip
 def write_clip_labels(rows, out_path, label):
-    """One row per clip — mean perceived duration across all participants."""
+    """Write clip-level averages for perceived duration."""
     by_clip = defaultdict(list)
     for r in rows:
         by_clip[r['clip_id']].append(r['response'])
@@ -85,9 +86,9 @@ def write_clip_labels(rows, out_path, label):
     print(f"  {len(results)} clips, mean perceived = {mean_perceived:.2f}s")
 
 
-# ── Helper: write trial-level CSV ─────────────────────────────────────────────
+# Write one row per trial response
 def write_trial_labels(rows, out_path, label):
-    """One row per individual trial response — correct format for model evaluation."""
+    """Write trial-level responses in the format used for evaluation."""
     rows_sorted = sorted(rows, key=lambda r: (r['participant_id'], int(r['clip_id'])))
 
     with open(out_path, 'w', newline='', encoding='utf-8') as f:
@@ -102,7 +103,7 @@ def write_trial_labels(rows, out_path, label):
     print(f"  {len(rows_sorted)} individual trials")
 
 
-# ── Generate clip-level averages (used for audio model calibration) ───────────
+# Create clip-level averages for calibration
 print("\n── Clip-level averages ──────────────────────────────────────────")
 write_clip_labels(
     [r for r in clean if r['condition'] == 'A'],
@@ -120,7 +121,7 @@ write_clip_labels(
     "Audio+Video (AV)"
 )
 
-# ── Generate trial-level files (used for model evaluation) ───────────────────
+# Create trial-level files for evaluation
 print("\n── Trial-level individual responses ─────────────────────────────")
 write_trial_labels(
     [r for r in clean if r['condition'] == 'A'],
@@ -138,7 +139,7 @@ write_trial_labels(
     "Audio+Video (AV)"
 )
 
-# ── All responses combined ────────────────────────────────────────────────────
+# Save all cleaned responses in one file
 all_out = OUT_DIR / "all_responses.csv"
 with open(all_out, 'w', newline='', encoding='utf-8') as f:
     writer = csv.DictWriter(f, fieldnames=[

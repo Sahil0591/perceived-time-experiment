@@ -12,8 +12,8 @@ Outputs:
 
 Usage (Windows cmd):
   python -m scripts.train_audio_calibration ^
-    --summary d:\Sahil\Capstone_Project\results\audio\summary.csv ^
-    --labels d:\Sahil\Capstone_Project\data\labels\audio_perceived.csv ^
+    --summary results/audio/summary.csv ^
+    --labels data/labels/audio_perceived.csv ^
     --feature sum_dL2 ^
     --label-col perceived_s
 """

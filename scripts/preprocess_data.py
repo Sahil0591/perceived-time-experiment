@@ -1,5 +1,5 @@
 """
-Preprocess local video files (e.g., OBS recordings) for time-perception modeling.
+Preprocess local video files (OBS recordings)
 
 Pipeline:
 - Read local video files from a directory and/or explicit list (or data/raw by default)
@@ -24,33 +24,29 @@ import numpy as np
 import soundfile as sf
 from tqdm import tqdm
 
-# Media utils
+# Media helpers
 from moviepy.editor import VideoFileClip, AudioFileClip
 
-# Audio processing
+# Audio tools
 import librosa
 import cv2
 
 
-# -----------------------------
-# Config dataclass
-# -----------------------------
+# Configuration for preprocessing
 @dataclass
 class PreprocessConfig:
     raw_dir: Path
     output_dir: Path
     target_sr: int = 48_000
     target_db: float = -20.0  # target RMS loudness (dB)
-    # Visual frame extraction options
+    # Frame extraction settings
     save_frames: bool = False
     frames_dir: Path = Path("data/processed/frames")
     frames_fps: int = 30
     frame_size: int = 224
 
 
-# -----------------------------
-# Utility functions
-# -----------------------------
+# General helpers
 
 def ensure_dirs(*paths: Path) -> None:
     for p in paths:
@@ -58,7 +54,7 @@ def ensure_dirs(*paths: Path) -> None:
 
 
 def collect_input_files(input_dir: Optional[Path], files: List[str]) -> List[Path]:
-    """Gather input video files from a directory and/or explicit list.
+    """Collect video files from a folder, a file list, or both.
 
     Supported extensions: .mp4, .mov, .mkv, .avi, .webm
     """
@@ -72,7 +68,7 @@ def collect_input_files(input_dir: Optional[Path], files: List[str]) -> List[Pat
         p = Path(f)
         if p.exists() and p.suffix.lower() in exts:
             paths.append(p)
-    # Deduplicate preserving order
+    # Keep the first copy of each file and preserve the original order
     seen = set()
     uniq: List[Path] = []
     for p in paths:
@@ -93,22 +89,16 @@ def normalize_to_db(y: np.ndarray, target_db: float) -> np.ndarray:
     gain_db = target_db - cur_db
     gain = 10 ** (gain_db / 20.0)
     y_out = y * gain
-    # avoid clipping
+    # Clamp if the gain pushes the signal over full scale
     max_abs = np.max(np.abs(y_out))
     if max_abs > 1.0:
         y_out = y_out / max_abs
     return y_out.astype(np.float32)
 
-
-    
-
-
-# -----------------------------
 # Frame extraction helpers
-# -----------------------------
 
 def center_crop_resize(img: np.ndarray, size: int) -> np.ndarray:
-    """Center-crop to a square then resize to (size, size)."""
+    """Crop the image to a square and resize it to the requested size."""
     h, w = img.shape[:2]
     side = min(h, w)
     y0 = (h - side) // 2
@@ -118,7 +108,7 @@ def center_crop_resize(img: np.ndarray, size: int) -> np.ndarray:
 
 
 def extract_and_save_frames(video_path: Path, out_dir: Path, target_fps: int, frame_size: int) -> dict:
-    """Sample frames at exact timestamps (1/target_fps), save JPGs, frame_times.npy, and meta.json."""
+    """Sample frames on a fixed timeline and save the images plus metadata."""
     out_dir.mkdir(parents=True, exist_ok=True)
     if target_fps <= 0:
         raise ValueError("target_fps must be > 0 for frame extraction")
@@ -138,7 +128,7 @@ def extract_and_save_frames(video_path: Path, out_dir: Path, target_fps: int, fr
             saved += 1
             t += step
 
-    # Save timestamps for alignment with audio features
+    # Keep the timestamps around so audio and visual features can be aligned later
     np.save(str(out_dir / "frame_times.npy"), np.array(times, dtype=np.float32))
 
     meta = {
@@ -151,14 +141,10 @@ def extract_and_save_frames(video_path: Path, out_dir: Path, target_fps: int, fr
     }
     (out_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     return meta
-
-
-# -----------------------------
-# Core processing
-# -----------------------------
+# Main processing steps
 
 def copy_to_raw(src: Path, raw_dir: Path) -> Path:
-    """Copy input file into raw_dir for a consistent workflow."""
+    """Copy the input file into the raw folder so everything follows the same flow."""
     dst = raw_dir / src.name
     if dst.resolve() == src.resolve():
         return dst
@@ -168,7 +154,7 @@ def copy_to_raw(src: Path, raw_dir: Path) -> Path:
 
 
 def process_clip(in_path: Path, cfg: PreprocessConfig) -> Tuple[Path, Path]:
-    """Create processed video and wav with normalized audio (no trimming).
+    """Create the processed video and normalized audio file.
 
     Returns (processed_video_path, processed_wav_path).
     """
@@ -176,12 +162,12 @@ def process_clip(in_path: Path, cfg: PreprocessConfig) -> Tuple[Path, Path]:
     out_video = cfg.output_dir / f"{video_id}_processed.mp4"
     out_audio = cfg.output_dir / f"{video_id}_processed.wav"
 
-    # Load video and extract audio as ndarray
+    # Pull the audio track out so it can be resampled and normalized
     with VideoFileClip(str(in_path)) as vclip:
         duration = float(vclip.duration)
         if vclip.audio is None:
             raise RuntimeError(f"No audio track found in: {in_path}")
-        # Write temp wav to read with librosa for consistent resampling
+        # Write a temporary WAV so librosa can load it consistently
         tmp_wav = cfg.output_dir / f".{video_id}_tmp_input.wav"
         vclip.audio.write_audiofile(
             str(tmp_wav),
@@ -190,14 +176,14 @@ def process_clip(in_path: Path, cfg: PreprocessConfig) -> Tuple[Path, Path]:
             logger=None,
         )
 
-    # Load audio and normalize loudness (no trimming)
+    # Normalize loudness without changing the clip length
     y, sr = librosa.load(str(tmp_wav), sr=cfg.target_sr, mono=True)
     y = normalize_to_db(y, cfg.target_db)
 
-    # Save normalized (and possibly trimmed) wav
+    # Write the adjusted audio back out
     sf.write(str(out_audio), y, sr)
 
-    # Reconstruct final video with the processed audio, preserving full duration
+    # Reattach the processed audio and keep the original duration
     with VideoFileClip(str(in_path)) as vclip, AudioFileClip(str(out_audio)) as aclip:
         aclip = aclip.subclip(0, vclip.duration)
         vfinal = vclip.set_audio(aclip)
@@ -210,18 +196,14 @@ def process_clip(in_path: Path, cfg: PreprocessConfig) -> Tuple[Path, Path]:
             logger=None,
         )
 
-    # Cleanup temp
+    # Remove the temporary WAV if it was created
     try:
-        tmp_wav.unlink(missing_ok=True)  # type: ignore[arg-type]
+        tmp_wav.unlink(missing_ok=True)  
     except Exception:
         pass
 
     return out_video, out_audio
-
-
-# -----------------------------
-# CLI
-# -----------------------------
+# Command-line settings
 
 def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Preprocess local videos (OBS clips)")
@@ -231,7 +213,7 @@ def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
     p.add_argument("--output-dir", type=str, default="data/processed", help="Directory for processed outputs")
     p.add_argument("--target-sr", type=int, default=48_000, help="Target sample rate for audio")
     p.add_argument("--target-db", type=float, default=-20.0, help="Target RMS loudness in dB")
-    # Frame extraction options
+    # Frame extraction settings
     p.add_argument("--save-frames", action="store_true", help="Extract standardized frames for vision model")
     p.add_argument("--frames-dir", type=str, default="data/processed/frames", help="Directory root for frames")
     p.add_argument("--frames-fps", type=int, default=15, help="Target FPS for frame sampling")
@@ -239,12 +221,12 @@ def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
-essential_usage = """
+essential_usage = r"""
 Examples:
-    # Default: scan data/raw if no inputs provided
+    # If you do not pass any inputs, the script scans data/raw.
     python scripts\preprocess_data.py
 
-    # Specify a folder or files
+    # Process a specific folder or a few files.
     python scripts\preprocess_data.py --input-dir OBS_Clips --save-frames --frames-fps 15
     python scripts\preprocess_data.py videos\clip1.mp4 videos\clip2.mov --target-db -18
 """
@@ -268,7 +250,7 @@ def main() -> None:
     )
 
     inputs = collect_input_files(Path(args.input_dir) if args.input_dir else None, list(args.files))
-    # If none provided, fall back to scanning data/raw
+    # Fall back to data/raw when nothing was supplied on the command line
     if not inputs:
         inputs = collect_input_files(raw_dir, [])
     if not inputs:

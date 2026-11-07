@@ -1,0 +1,51 @@
+{
+  "model": "visual_accumulator_4layer",
+  "created_at": "2026-05-01T12:23:46",
+  "run_at": "2026-05-01T12:30:20",
+  "n_clips": 36,
+  "params": {
+    "ATTENTION_C": 0.67,
+    "layer_params": {
+      "conv2": {
+        "T_max": 340.0,
+        "T_min": 100.0,
+        "tau": 100.0,
+        "alpha": 50.0
+      },
+      "pool5": {
+        "T_max": 400.0,
+        "T_min": 100.0,
+        "tau": 100.0,
+        "alpha": 50.0
+      },
+      "fc7": {
+        "T_max": 35.0,
+        "T_min": 5.0,
+        "tau": 100.0,
+        "alpha": 50.0
+      },
+      "output": {
+        "T_max": 0.55,
+        "T_min": 0.15,
+        "tau": 100.0,
+        "alpha": 50.0
+      }
+    }
+  },
+  "calibration": {
+    "regressor": "epsilon-SVR (RBF kernel)",
+    "gamma": "scale",
+    "C_svr": 1.0,
+    "epsilon": 0.1,
+    "cv_folds": 10,
+    "features": "raw_ticks + log1p(ticks) per layer",
+    "physical_pickle": "D:\\Sahil\\Capstone_Project\\models\\visual_svr_physical.pkl",
+    "human_pickle": "D:\\Sahil\\Capstone_Project\\models\\visual_svr_human.pkl",
+    "n_support_physical": 4205,
+    "n_support_human": 4055
+  },
+  "summary": {
+    "mean_predicted_s": 16.88,
+    "mean_actual_s": 23.44
+  }
+}
